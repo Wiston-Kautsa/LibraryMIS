@@ -1,0 +1,4 @@
+module-info.class
+com\mycompany\librarymis\AddBookController.class
+com\mycompany\librarymis\App.class
+com\mycompany\librarymis\DatabaseHandler.class

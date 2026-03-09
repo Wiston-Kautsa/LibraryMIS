@@ -1,0 +1,4 @@
+--patch-module
+com.mycompany.librarymis=_
+--add-reads
+com.mycompany.librarymis=ALL-UNNAMED
