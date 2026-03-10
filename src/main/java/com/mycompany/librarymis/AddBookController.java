@@ -1,6 +1,8 @@
 package com.mycompany.librarymis;
 
 import java.net.URL;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,20 +10,21 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 
 public class AddBookController implements Initializable {
-
-    @FXML
-    private TextField bookTitle;
 
     @FXML
     private TextField bookID;
 
     @FXML
+    private TextField bookTitle;
+
+    @FXML
     private TextField bookAuthor;
 
     @FXML
-    private TextField Publisher;
+    private TextField publisher;
 
     @FXML
     private Button save;
@@ -29,28 +32,36 @@ public class AddBookController implements Initializable {
     @FXML
     private Button cancel;
 
-    DatabaseHandler databaseHandler;
+    private DatabaseHandler databaseHandler;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         databaseHandler = DatabaseHandler.getInstance();
+
+        // Test database connection
+        checkData();
     }
 
     @FXML
     private void saveButton(ActionEvent event) {
+        addBook();
+    }
 
-        String title = bookTitle.getText();
-        String id = bookID.getText();
-        String author = bookAuthor.getText();
-        String publisher = Publisher.getText();
+    @FXML
+    private void cancelButton(ActionEvent event) {
+        closeWindow();
+    }
 
-        if (title.isEmpty() || id.isEmpty() || author.isEmpty() || publisher.isEmpty()) {
+    private void addBook() {
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Error");
-            alert.setHeaderText("Missing Information");
-            alert.setContentText("Please fill all fields.");
-            alert.showAndWait();
+        String id = bookID.getText().trim();
+        String title = bookTitle.getText().trim();
+        String author = bookAuthor.getText().trim();
+        String pub = publisher.getText().trim();
+
+        if (id.isEmpty() || title.isEmpty() || author.isEmpty() || pub.isEmpty()) {
+            showAlert("Error", "Please fill all fields.");
             return;
         }
 
@@ -58,40 +69,76 @@ public class AddBookController implements Initializable {
                 + id + "','"
                 + title + "','"
                 + author + "','"
-                + publisher + "',"
+                + pub + "',"
                 + "true"
                 + ")";
 
-        if (databaseHandler.execAction(query)) {
+        boolean result = databaseHandler.execAction(query);
 
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Success");
-            alert.setHeaderText(null);
-            alert.setContentText("Book Added Successfully");
-            alert.showAndWait();
+        if (result) {
 
+            showAlert("Success", "Book added successfully.");
             clearFields();
+
+            // Show database contents after inserting
+            checkData();
 
         } else {
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Failed");
-            alert.setHeaderText(null);
-            alert.setContentText("Operation Failed");
-            alert.showAndWait();
-
+            showAlert("Database Error", "Could not insert data.");
         }
     }
 
-    @FXML
-    private void cancelButton(ActionEvent event) {
-        clearFields();
+    private void closeWindow() {
+
+        Stage stage = (Stage) cancel.getScene().getWindow();
+        stage.close();
     }
 
     private void clearFields() {
-        bookTitle.clear();
+
         bookID.clear();
+        bookTitle.clear();
         bookAuthor.clear();
-        Publisher.clear();
+        publisher.clear();
+    }
+
+    private void showAlert(String title, String message) {
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void checkData() {
+
+    System.out.println("Checking database...");
+
+    String query = "SELECT title FROM BOOK";
+
+    ResultSet rs = databaseHandler.execQuery(query);
+
+    if (rs == null) {
+        System.out.println("Query failed.");
+        return;
+    }
+
+    try {
+
+        while (rs.next()) {
+
+            String title = rs.getString("title");
+            System.out.println("Book: " + title);
+
+        }
+
+        rs.close();   // IMPORTANT
+
+    } catch (SQLException ex) {
+
+        ex.printStackTrace();
+    }
     }
 }

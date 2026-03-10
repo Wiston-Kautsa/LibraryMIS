@@ -1,4 +1,9 @@
-module-info.class
+com\mycompany\librarymis\BooklistController$Book.class
 com\mycompany\librarymis\AddBookController.class
+com\mycompany\librarymis\ListMemberController.class
+com\mycompany\librarymis\AddMemberController.class
+com\mycompany\librarymis\ListMemberController$Member.class
+module-info.class
 com\mycompany\librarymis\App.class
+com\mycompany\librarymis\BooklistController.class
 com\mycompany\librarymis\DatabaseHandler.class
