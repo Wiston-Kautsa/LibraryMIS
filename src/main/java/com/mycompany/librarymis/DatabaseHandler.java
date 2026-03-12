@@ -9,186 +9,179 @@ import java.sql.SQLException;
 
 public class DatabaseHandler {
 
-private static DatabaseHandler handler = null;
-private static final String DB_URL = "jdbc:sqlite:library.db";
+    private static DatabaseHandler handler = null;
+    private static final String DB_URL = "jdbc:sqlite:library.db";
 
-private Connection conn = null;
+    private Connection conn = null;
 
-private DatabaseHandler() {
-    createConnection();
-    setupBookTable();
-    setupIssueTable();
-    setupMemberTable();
-}
-
-public static DatabaseHandler getInstance() {
-
-    if (handler == null) {
-        handler = new DatabaseHandler();
+    private DatabaseHandler() {
+        createConnection();
+        setupBookTable();
+        setupMemberTable();
+        setupIssueTable();
     }
 
-    return handler;
-}
+    public static DatabaseHandler getInstance() {
 
-private void createConnection() {
-
-    try {
-
-        conn = DriverManager.getConnection(DB_URL);
-
-        if (conn != null) {
-            System.out.println("Database connected successfully.");
+        if (handler == null) {
+            handler = new DatabaseHandler();
         }
 
-    } catch (SQLException e) {
-
-        System.err.println("Database connection failed.");
-        e.printStackTrace();
+        return handler;
     }
-}
 
-private void setupBookTable() {
+    private void createConnection() {
 
-    String TABLE_NAME = "BOOK";
+        try {
 
-    try {
+            conn = DriverManager.getConnection(DB_URL);
 
-        Statement stmt = conn.createStatement();
+            if (conn != null) {
+                System.out.println("SQLite database connected.");
+            }
 
-        DatabaseMetaData meta = conn.getMetaData();
-        ResultSet tables = meta.getTables(null, null, TABLE_NAME.toUpperCase(), null);
+        } catch (SQLException e) {
 
-        if (tables.next()) {
-
-            System.out.println("Table " + TABLE_NAME + " already exists.");
-
-        } else {
-
-            stmt.executeUpdate(
-                    "CREATE TABLE " + TABLE_NAME + " ("
-                    + "id TEXT PRIMARY KEY, "
-                    + "title TEXT, "
-                    + "author TEXT, "
-                    + "publisher TEXT, "
-                    + "isAvail BOOLEAN DEFAULT TRUE)"
-            );
-
-            System.out.println("BOOK table created.");
+            System.err.println("Database connection failed.");
+            e.printStackTrace();
         }
-
-    } catch (SQLException e) {
-
-        System.err.println("Error creating BOOK table.");
-        e.printStackTrace();
     }
-}
 
-private void setupIssueTable() {
+    private void setupBookTable() {
 
-    String TABLE_NAME = "ISSUE";
+        String TABLE_NAME = "BOOK";
 
-    try {
+        try (Statement stmt = conn.createStatement()) {
 
-        Statement stmt = conn.createStatement();
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet tables = meta.getTables(null, null, TABLE_NAME, null);
 
-        DatabaseMetaData meta = conn.getMetaData();
-        ResultSet tables = meta.getTables(null, null, TABLE_NAME.toUpperCase(), null);
+            if (tables.next()) {
 
-        if (tables.next()) {
+                System.out.println("BOOK table already exists.");
 
-            System.out.println("Table " + TABLE_NAME + " already exists.");
+            } else {
 
-        } else {
+                stmt.executeUpdate(
+                        "CREATE TABLE " + TABLE_NAME + " ("
+                        + "id TEXT PRIMARY KEY, "
+                        + "title TEXT NOT NULL, "
+                        + "author TEXT, "
+                        + "publisher TEXT, "
+                        + "isAvail BOOLEAN DEFAULT TRUE)"
+                );
 
-            stmt.executeUpdate(
-                    "CREATE TABLE " + TABLE_NAME + " ("
-                    + "bookID TEXT PRIMARY KEY, "
-                    + "memberID TEXT, "
-                    + "issueTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
-                    + "renew_count INTEGER DEFAULT 0, "
-                    + "FOREIGN KEY(bookID) REFERENCES BOOK(id))"
-            );
+                System.out.println("BOOK table created.");
+            }
 
-            System.out.println("ISSUE table created.");
+        } catch (SQLException e) {
+
+            System.err.println("Error creating BOOK table.");
+            e.printStackTrace();
         }
-
-    } catch (SQLException e) {
-
-        System.err.println("Error creating ISSUE table.");
-        e.printStackTrace();
     }
-}
 
-private void setupMemberTable() {
+    private void setupMemberTable() {
 
-    String TABLE_NAME = "MEMBER";
+        String TABLE_NAME = "MEMBER";
 
-    try {
+        try (Statement stmt = conn.createStatement()) {
 
-        Statement stmt = conn.createStatement();
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet tables = meta.getTables(null, null, TABLE_NAME, null);
 
-        DatabaseMetaData dbm = conn.getMetaData();
-        ResultSet tables = dbm.getTables(null, null, TABLE_NAME.toUpperCase(), null);
+            if (tables.next()) {
 
-        if (tables.next()) {
+                System.out.println("MEMBER table already exists.");
 
-            System.out.println("Table " + TABLE_NAME + " already exists.");
+            } else {
 
-        } else {
+                stmt.executeUpdate(
+                        "CREATE TABLE " + TABLE_NAME + " ("
+                        + "id TEXT PRIMARY KEY, "
+                        + "name TEXT NOT NULL, "
+                        + "mobile TEXT, "
+                        + "email TEXT)"
+                );
 
-            stmt.executeUpdate(
-                    "CREATE TABLE " + TABLE_NAME + " ("
-                    + "id TEXT PRIMARY KEY, "
-                    + "name TEXT, "
-                    + "mobile TEXT, "
-                    + "email TEXT)"
-            );
+                System.out.println("MEMBER table created.");
+            }
 
-            System.out.println("MEMBER table created.");
+        } catch (SQLException e) {
+
+            System.err.println("Error creating MEMBER table.");
+            e.printStackTrace();
         }
-
-    } catch (SQLException e) {
-
-        System.err.println("Error creating MEMBER table.");
-        e.printStackTrace();
     }
-}
 
-public ResultSet execQuery(String query) {
+    private void setupIssueTable() {
 
-    try {
+        String TABLE_NAME = "ISSUE";
 
-        Statement stmt = conn.createStatement();
-        return stmt.executeQuery(query);
+        try (Statement stmt = conn.createStatement()) {
 
-    } catch (SQLException ex) {
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet tables = meta.getTables(null, null, TABLE_NAME, null);
 
-        System.err.println("Error executing query: " + query);
-        ex.printStackTrace();
-        return null;
+            if (tables.next()) {
+
+                System.out.println("ISSUE table already exists.");
+
+            } else {
+
+                stmt.executeUpdate(
+                        "CREATE TABLE " + TABLE_NAME + " ("
+                        + "issueID INTEGER PRIMARY KEY AUTOINCREMENT, "
+                        + "bookID TEXT NOT NULL, "
+                        + "memberID TEXT NOT NULL, "
+                        + "issueTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP, "
+                        + "renew_count INTEGER DEFAULT 0, "
+                        + "FOREIGN KEY(bookID) REFERENCES BOOK(id), "
+                        + "FOREIGN KEY(memberID) REFERENCES MEMBER(id))"
+                );
+
+                System.out.println("ISSUE table created.");
+            }
+
+        } catch (SQLException e) {
+
+            System.err.println("Error creating ISSUE table.");
+            e.printStackTrace();
+        }
     }
-}
 
-public boolean execAction(String query) {
+    public ResultSet execQuery(String query) {
 
-    try {
+        try {
 
-        Statement stmt = conn.createStatement();
-        stmt.executeUpdate(query);
+            Statement stmt = conn.createStatement();
+            return stmt.executeQuery(query);
 
-        return true;
+        } catch (SQLException ex) {
 
-    } catch (SQLException e) {
-
-        System.err.println("Error executing action: " + query);
-        e.printStackTrace();
-        return false;
+            System.err.println("Error executing query: " + query);
+            ex.printStackTrace();
+            return null;
+        }
     }
-}
 
-public Connection getConnection() {
-    return conn;
-}
+    public boolean execAction(String query) {
 
+        try (Statement stmt = conn.createStatement()) {
+
+            stmt.executeUpdate(query);
+            return true;
+
+        } catch (SQLException e) {
+
+            System.err.println("Error executing action: " + query);
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Connection getConnection() {
+        return conn;
+    }
 
 }

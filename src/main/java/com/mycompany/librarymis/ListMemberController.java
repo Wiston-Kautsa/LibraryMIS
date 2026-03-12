@@ -18,102 +18,124 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 public class ListMemberController implements Initializable {
 
-@FXML
-private TableView<Member> tableView;
+    @FXML
+    private TableView<Member> tableView;
 
-@FXML
-private TableColumn<Member, String> nameCol;
+    @FXML
+    private TableColumn<Member, String> nameCol;
 
-@FXML
-private TableColumn<Member, String> idCol;
+    @FXML
+    private TableColumn<Member, String> idCol;
 
-@FXML
-private TableColumn<Member, String> mobileCol;
+    @FXML
+    private TableColumn<Member, String> mobileCol;
 
-@FXML
-private TableColumn<Member, String> emailCol;
+    @FXML
+    private TableColumn<Member, String> emailCol;
 
-@Override
-public void initialize(URL url, ResourceBundle rb) {
+    @FXML
+    private TableColumn<Member, String> borrowedCol;
 
-    initCol();
-    loadData();
+    private ObservableList<Member> list = FXCollections.observableArrayList();
 
-}
+    @Override
+    public void initialize(URL url, ResourceBundle rb) {
 
-private void initCol() {
+        initCol();
+        loadData();
+    }
 
-    nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
-    idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-    mobileCol.setCellValueFactory(new PropertyValueFactory<>("mobile"));
-    emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+    private void initCol() {
 
-}
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
+        mobileCol.setCellValueFactory(new PropertyValueFactory<>("mobile"));
+        emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
+        borrowedCol.setCellValueFactory(new PropertyValueFactory<>("borrowed"));
+    }
 
-private void loadData() {
+    private void loadData() {
 
-    ObservableList<Member> list = FXCollections.observableArrayList();
+        list.clear();
 
-    DatabaseHandler handler = DatabaseHandler.getInstance();
+        DatabaseHandler handler = DatabaseHandler.getInstance();
 
-    String query = "SELECT * FROM MEMBER";
-    ResultSet rs = handler.execQuery(query);
+        String query =
+                "SELECT m.id, m.name, m.mobile, m.email, " +
+                "GROUP_CONCAT(i.bookID, ', ') AS borrowed " +
+                "FROM MEMBER m " +
+                "LEFT JOIN ISSUE i ON m.id = i.memberID " +
+                "GROUP BY m.id";
 
-    try {
+        ResultSet rs = handler.execQuery(query);
 
-        while (rs.next()) {
-
-            String name = rs.getString("name");
-            String id = rs.getString("id");
-            String mobile = rs.getString("mobile");
-            String email = rs.getString("email");
-
-            list.add(new Member(name, id, mobile, email));
-
+        if (rs == null) {
+            System.out.println("Query execution failed.");
+            return;
         }
 
-    } catch (SQLException ex) {
+        try {
 
-        Logger.getLogger(ListMemberController.class.getName()).log(Level.SEVERE, null, ex);
+            while (rs.next()) {
 
+                String name = rs.getString("name");
+                String id = rs.getString("id");
+                String mobile = rs.getString("mobile");
+                String email = rs.getString("email");
+
+                String borrowed = rs.getString("borrowed");
+
+                if (borrowed == null) {
+                    borrowed = "None";
+                }
+
+                list.add(new Member(name, id, mobile, email, borrowed));
+            }
+
+        } catch (SQLException ex) {
+
+            Logger.getLogger(ListMemberController.class.getName())
+                    .log(Level.SEVERE, null, ex);
+        }
+
+        tableView.setItems(list);
     }
 
-    tableView.getItems().setAll(list);
+    public static class Member {
 
-}
+        private final SimpleStringProperty name;
+        private final SimpleStringProperty id;
+        private final SimpleStringProperty mobile;
+        private final SimpleStringProperty email;
+        private final SimpleStringProperty borrowed;
 
-public static class Member {
+        public Member(String name, String id, String mobile, String email, String borrowed) {
 
-    private final SimpleStringProperty name;
-    private final SimpleStringProperty id;
-    private final SimpleStringProperty mobile;
-    private final SimpleStringProperty email;
+            this.name = new SimpleStringProperty(name);
+            this.id = new SimpleStringProperty(id);
+            this.mobile = new SimpleStringProperty(mobile);
+            this.email = new SimpleStringProperty(email);
+            this.borrowed = new SimpleStringProperty(borrowed);
+        }
 
-    public Member(String name, String id, String mobile, String email) {
+        public String getName() {
+            return name.get();
+        }
 
-        this.name = new SimpleStringProperty(name);
-        this.id = new SimpleStringProperty(id);
-        this.mobile = new SimpleStringProperty(mobile);
-        this.email = new SimpleStringProperty(email);
+        public String getId() {
+            return id.get();
+        }
 
+        public String getMobile() {
+            return mobile.get();
+        }
+
+        public String getEmail() {
+            return email.get();
+        }
+
+        public String getBorrowed() {
+            return borrowed.get();
+        }
     }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public String getId() {
-        return id.get();
-    }
-
-    public String getMobile() {
-        return mobile.get();
-    }
-
-    public String getEmail() {
-        return email.get();
-    }
-}
-
-
 }

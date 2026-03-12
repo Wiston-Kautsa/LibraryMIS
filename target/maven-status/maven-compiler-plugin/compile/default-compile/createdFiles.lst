@@ -6,4 +6,5 @@ com\mycompany\librarymis\ListMemberController$Member.class
 module-info.class
 com\mycompany\librarymis\App.class
 com\mycompany\librarymis\BooklistController.class
+com\mycompany\librarymis\MainController.class
 com\mycompany\librarymis\DatabaseHandler.class
