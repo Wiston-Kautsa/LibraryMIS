@@ -33,12 +33,16 @@ public class DatabaseHandler {
         return handler;
     }
 
+    // ---------------- CREATE CONNECTION ----------------
+
     void createConnection() {
 
         try {
 
             Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(DB_URL);
+
+            System.out.println("Database connected.");
 
         } catch (Exception e) {
 
@@ -49,6 +53,21 @@ public class DatabaseHandler {
             alert.showAndWait();
 
             System.exit(0);
+        }
+    }
+
+    // ---------------- ENSURE CONNECTION ----------------
+
+    private void ensureConnection() {
+
+        try {
+
+            if (conn == null || conn.isClosed()) {
+                createConnection();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -161,9 +180,71 @@ public class DatabaseHandler {
         }
     }
 
+    // ---------------- GENERATE BOOK ID ----------------
+
+    public String generateBookID() {
+
+        String query = "SELECT id FROM BOOK ORDER BY id DESC LIMIT 1";
+
+        try {
+
+            ResultSet rs = execQuery(query);
+
+            if (rs.next()) {
+
+                String lastID = rs.getString("id");
+                int num = Integer.parseInt(lastID.substring(1));
+                num++;
+
+                return String.format("B%03d", num);
+
+            } else {
+
+                return "B001";
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return "B001";
+        }
+    }
+
+    // ---------------- GENERATE MEMBER ID ----------------
+
+    public String generateMemberID() {
+
+        String query = "SELECT id FROM MEMBER ORDER BY id DESC LIMIT 1";
+
+        try {
+
+            ResultSet rs = execQuery(query);
+
+            if (rs.next()) {
+
+                String lastID = rs.getString("id");
+                int num = Integer.parseInt(lastID.substring(1));
+                num++;
+
+                return String.format("M%03d", num);
+
+            } else {
+
+                return "M001";
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return "M001";
+        }
+    }
+
     // ---------------- EXECUTE QUERY ----------------
 
     public ResultSet execQuery(String query) {
+
+        ensureConnection();
 
         try {
 
@@ -182,6 +263,8 @@ public class DatabaseHandler {
 
     public boolean execAction(String query) {
 
+        ensureConnection();
+
         try (Statement stmt = conn.createStatement()) {
 
             stmt.executeUpdate(query);
@@ -196,6 +279,8 @@ public class DatabaseHandler {
     }
 
     public Connection getConnection() {
+
+        ensureConnection();
         return conn;
     }
 
@@ -208,12 +293,7 @@ public class DatabaseHandler {
         try (PreparedStatement stmt = conn.prepareStatement(deleteStatement)) {
 
             stmt.setString(1, book.getId());
-
-            int rowsAffected = stmt.executeUpdate();
-
-            System.out.println("Rows deleted: " + rowsAffected);
-
-            return rowsAffected > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException ex) {
 
@@ -222,7 +302,7 @@ public class DatabaseHandler {
         }
     }
 
-    // ---------------- UPDATE BOOK (EDIT BOOK) ----------------
+    // ---------------- UPDATE BOOK ----------------
 
     public boolean updateBook(BooklistController.Book book) {
 
@@ -236,11 +316,7 @@ public class DatabaseHandler {
             stmt.setString(3, book.getPublisher());
             stmt.setString(4, book.getId());
 
-            int res = stmt.executeUpdate();
-
-            System.out.println("Rows updated: " + res);
-
-            return res > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException ex) {
 
@@ -258,12 +334,7 @@ public class DatabaseHandler {
         try (PreparedStatement stmt = conn.prepareStatement(deleteStatement)) {
 
             stmt.setString(1, member.getId());
-
-            int rowsAffected = stmt.executeUpdate();
-
-            System.out.println("Rows deleted: " + rowsAffected);
-
-            return rowsAffected > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException ex) {
 
@@ -272,7 +343,7 @@ public class DatabaseHandler {
         }
     }
 
-    // ---------------- UPDATE MEMBER (EDIT MEMBER) ----------------
+    // ---------------- UPDATE MEMBER ----------------
 
     public boolean updateMember(ListMemberController.Member member) {
 
@@ -286,11 +357,7 @@ public class DatabaseHandler {
             stmt.setString(3, member.getEmail());
             stmt.setString(4, member.getId());
 
-            int res = stmt.executeUpdate();
-
-            System.out.println("Rows updated: " + res);
-
-            return res > 0;
+            return stmt.executeUpdate() > 0;
 
         } catch (SQLException ex) {
 
@@ -299,7 +366,7 @@ public class DatabaseHandler {
         }
     }
 
-    // ---------------- CHECK IF BOOK IS ISSUED ----------------
+    // ---------------- CHECK BOOK ISSUED ----------------
 
     public boolean isBookAlreadyIssued(BooklistController.Book book) {
 
@@ -312,12 +379,7 @@ public class DatabaseHandler {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-
-                int count = rs.getInt(1);
-
-                System.out.println("Issued count: " + count);
-
-                return count > 0;
+                return rs.getInt(1) > 0;
             }
 
         } catch (SQLException ex) {
@@ -328,7 +390,7 @@ public class DatabaseHandler {
         return false;
     }
 
-    // ---------------- CHECK IF MEMBER HAS BOOKS ----------------
+    // ---------------- CHECK MEMBER BORROWED BOOKS ----------------
 
     public boolean isMemberHasBooks(ListMemberController.Member member) {
 
@@ -341,12 +403,7 @@ public class DatabaseHandler {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-
-                int count = rs.getInt(1);
-
-                System.out.println("Borrowed books: " + count);
-
-                return count > 0;
+                return rs.getInt(1) > 0;
             }
 
         } catch (SQLException ex) {

@@ -13,12 +13,12 @@ import javafx.fxml.Initializable;
 
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class LoginController implements Initializable {
 
@@ -51,13 +51,19 @@ public class LoginController implements Initializable {
         titleLabel.setText("Library Assistant Login");
         titleLabel.setStyle("-fx-background-color:black; -fx-text-fill:white;");
 
-        String uname = username.getText();
-        String pword = password.getText();
+        String uname = username.getText().trim();
+        String pword = password.getText().trim();
+
+        if (uname.isEmpty() || pword.isEmpty()) {
+
+            titleLabel.setText("Enter Username & Password");
+            titleLabel.setStyle("-fx-background-color:#d32f2f; -fx-text-fill:white;");
+            return;
+        }
 
         if (uname.equals(preference.getUsername()) &&
             pword.equals(preference.getPassword())) {
 
-            closeStage();
             loadMain();
 
         } else {
@@ -81,18 +87,6 @@ public class LoginController implements Initializable {
 
     /*
     --------------------------------
-    CLOSE LOGIN WINDOW
-    --------------------------------
-    */
-
-    private void closeStage() {
-
-        Stage stage = (Stage) username.getScene().getWindow();
-        stage.close();
-    }
-
-    /*
-    --------------------------------
     LOAD MAIN WINDOW
     --------------------------------
     */
@@ -101,13 +95,15 @@ public class LoginController implements Initializable {
 
         try {
 
-            Parent parent = FXMLLoader.load(
-                    getClass().getResource("/com/mycompany/librarymis/Main.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/mycompany/librarymis/Main.fxml"));
 
-            Stage stage = new Stage(StageStyle.DECORATED);
+            Parent root = loader.load();
+
+            Stage stage = (Stage) username.getScene().getWindow();
             stage.setTitle("Library Assistant");
-            stage.setScene(new Scene(parent));
+            stage.setScene(new Scene(root));
+            stage.centerOnScreen();
             stage.show();
 
         } catch (IOException ex) {

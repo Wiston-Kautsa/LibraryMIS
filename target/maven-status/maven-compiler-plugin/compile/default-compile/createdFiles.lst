@@ -4,9 +4,10 @@ com\mycompany\librarymis\AddMemberController.class
 module-info.class
 com\mycompany\librarymis\App.class
 com\mycompany\librarymis\LoginController.class
-.netbeans_automatic_build
 com\mycompany\librarymis\BooklistController$Book.class
+com\mycompany\librarymis\BulkService$1.class
 com\mycompany\librarymis\BorrowedBooksController$BorrowedBook.class
+com\mycompany\librarymis\BulkService.class
 com\mycompany\librarymis\SettingsController.class
 com\mycompany\librarymis\ListMemberController$Member.class
 com\mycompany\librarymis\BorrowedBooksController.class

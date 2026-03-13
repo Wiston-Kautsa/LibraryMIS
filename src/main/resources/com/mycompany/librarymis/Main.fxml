@@ -19,187 +19,143 @@
 
 <children>
 
-<BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<BorderPane fx:id="mainBorderPane" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+
+<!-- ================= MENU ================= -->
 
 <top>
 <MenuBar>
-<menus>
 
 <Menu text="File">
-<items>
 <MenuItem onAction="#handleMenuClose" text="Close" />
-</items>
 </Menu>
 
 <Menu text="Add">
-<items>
 <MenuItem onAction="#handleMenuAddBook" text="Add Book" />
 <MenuItem onAction="#handleMenuAddMember" text="Add Member" />
-</items>
+<MenuItem fx:id="bulkMember" onAction="#handleBulkAddMember" text="Bulk Add Member" />
+<MenuItem fx:id="bulkAddBook" onAction="#handleBulkAddBook" text="Bulk Add Book" />
 </Menu>
 
 <Menu text="View">
-<items>
 <MenuItem onAction="#handleMenuViewBook" text="View Book" />
 <MenuItem onAction="#handleMenuViewMember" text="View Member" />
-                        <MenuItem onAction="#handleMenuViewBorrowedBooks" text="View Borrowed Books" />
-<MenuItem onAction="#handleMenuFullScreean" text="FullScreen" />
-</items>
+<MenuItem onAction="#handleMenuViewBorrowedBooks" text="View Borrowed Books" />
+<MenuItem onAction="#handleMenuFullScreen" text="FullScreen" />
 </Menu>
 
 <Menu text="Help">
-<items>
 <MenuItem text="About" />
-</items>
 </Menu>
 
-</menus>
 </MenuBar>
 </top>
 
+<!-- ================= RIGHT SIDE BUTTONS ================= -->
+
 <right>
 
-<VBox prefWidth="150">
+<VBox alignment="TOP_CENTER" prefWidth="150" spacing="10">
 
-<children>
-
-<Button fx:id="addMember" onAction="#loadAddMember" prefHeight="300.0" prefWidth="150.0" text="Add Member" />
-
-<Button fx:id="addBook" onAction="#loadAddBook" prefHeight="300.0" prefWidth="200" text="Add Book" />
-
-<Button fx:id="viewMember" onAction="#loadViewMember" prefHeight="300.0" prefWidth="200" text="View Members" />
-
-<Button fx:id="viewBook" onAction="#loadViewBook" prefHeight="300.0" prefWidth="200" text="View Books" />
-
-<Button fx:id="settings" onAction="#loadSettings" prefHeight="300.0" prefWidth="200" text="Settings" />
-
-</children>
+<Button fx:id="addMember" onAction="#loadAddMember" prefHeight="200.0" prefWidth="140" text="Add Member" />
+<Button fx:id="addBook" onAction="#loadAddBook" prefHeight="200.0" prefWidth="140" text="Add Book" />
+<Button fx:id="viewMember" onAction="#loadViewMember" prefHeight="200.0" prefWidth="140" text="View Members" />
+<Button fx:id="viewBook" onAction="#loadViewBook" prefHeight="200.0" prefWidth="140" text="View Books" />
+<Button fx:id="settings" onAction="#loadSettings" prefHeight="200.0" prefWidth="140" text="Settings" />
 
 </VBox>
 
 </right>
 
+<!-- ================= CENTER CONTENT ================= -->
+
 <center>
 
 <TabPane tabClosingPolicy="UNAVAILABLE">
 
-<tabs>
+<!-- ================= BOOK ISSUE TAB ================= -->
 
 <Tab text="Book Issue">
-
-<content>
 
 <AnchorPane>
 
 <VBox AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
 
-<children>
+<!-- BOOK INFO -->
 
-<HBox fx:id="bookinfo" alignment="CENTER" prefHeight="300.0">
+<HBox fx:id="bookinfo" alignment="CENTER" prefHeight="200.0" spacing="20">
 
-<children>
+<TextField fx:id="bookidinput" onAction="#loadBookInfo" prefHeight="25.0" prefWidth="140.0" promptText="Enter Book ID">
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                              </HBox.margin></TextField>
 
-<TextField fx:id="bookidinput" onAction="#loadBookInfo" promptText="Enter Book ID">
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
-</TextField>
-
-<VBox alignment="CENTER" prefHeight="132.0" prefWidth="196.0">
-
-<children>
+<VBox alignment="CENTER" prefHeight="175.0" prefWidth="181.0">
 
 <Text fx:id="bookname" text="Book Name">
-<VBox.margin>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</VBox.margin>
-</Text>
-
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin></Text>
 <Text fx:id="bookauthor" text="Author">
-<VBox.margin>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</VBox.margin>
-</Text>
-
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin></Text>
 <Text fx:id="bookstatus" text="Status">
-<VBox.margin>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</VBox.margin>
-</Text>
-
-</children>
-
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin></Text>
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                              </HBox.margin>
 
 </VBox>
 
-</children>
-
 </HBox>
 
-<HBox fx:id="memberinfo" alignment="CENTER" prefHeight="300.0">
+<!-- MEMBER INFO -->
 
-<children>
+<HBox fx:id="memberinfo" alignment="CENTER" prefHeight="200.0" spacing="20">
 
 <TextField fx:id="memberidinput" onAction="#loadMemberInfo" promptText="Enter Member ID">
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
-</TextField>
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                              </HBox.margin></TextField>
 
-<VBox alignment="CENTER" prefHeight="132.0" prefWidth="189.0">
-
-<children>
+<VBox alignment="CENTER" prefHeight="175.0" prefWidth="190.0">
 
 <Text fx:id="membername" text="Member Name">
-<VBox.margin>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</VBox.margin>
-</Text>
-
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin></Text>
 <Text fx:id="membercontact" text="Contact">
-<VBox.margin>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</VBox.margin>
-</Text>
-
-</children>
-
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
+                                 <VBox.margin>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </VBox.margin></Text>
+                              <HBox.margin>
+                                 <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+                              </HBox.margin>
 
 </VBox>
 
-</children>
-
 </HBox>
 
-<HBox alignment="CENTER" prefHeight="77.0" prefWidth="389.0">
+<!-- ISSUE BUTTON -->
 
-<children>
+<HBox alignment="CENTER" prefHeight="70.0" prefWidth="389.0">
 
 <Button fx:id="issue" onAction="#loadIssueBook" text="Issue" />
 
-</children>
-
 </HBox>
-
-</children>
 
 </VBox>
 
 </AnchorPane>
 
-</content>
-
 </Tab>
 
-<Tab text="Renew/Submission">
+<!-- ================= RENEW / SUBMISSION TAB ================= -->
 
-<content>
+<Tab text="Renew / Submission">
 
 <AnchorPane>
 
@@ -207,7 +163,10 @@
 
 <top>
 
-<TextField fx:id="bookID2" onAction="#loadBookID2" promptText="Enter Book ID" />
+<TextField fx:id="bookID2" onAction="#loadBookID2" promptText="Enter Book ID">
+                              <BorderPane.margin>
+                                 <Insets top="10.0" />
+                              </BorderPane.margin></TextField>
 
 </top>
 
@@ -219,23 +178,11 @@
 
 <bottom>
 
-<HBox alignment="CENTER">
+<HBox alignment="CENTER" spacing="20">
 
-<children>
+<Button fx:id="renewloadSubmissionOp" onAction="#loadRenewOp" text="Renew" />
 
-<Button fx:id="renewloadSubmissionOp" onAction="#loadRenewOp" text="Renew">
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
-</Button>
-
-<Button fx:id="submission" onAction="#loadSubmissionOp" text="Submission">
-<HBox.margin>
-<Insets left="20.0" right="20.0" />
-</HBox.margin>
-</Button>
-
-</children>
+<Button fx:id="submission" onAction="#loadSubmissionOp" text="Submission" />
 
 </HBox>
 
@@ -245,11 +192,7 @@
 
 </AnchorPane>
 
-</content>
-
 </Tab>
-
-</tabs>
 
 </TabPane>
 
