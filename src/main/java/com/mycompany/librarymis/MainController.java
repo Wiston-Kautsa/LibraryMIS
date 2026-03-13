@@ -5,7 +5,6 @@ import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,15 +15,19 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+
 import javafx.scene.text.Text;
+
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
@@ -53,19 +56,22 @@ public class MainController implements Initializable {
 
     @FXML private ListView<String> issuedatalist;
 
-    DatabaseHandler databaseHandler;
-
-    Boolean isReadyForSubmission = false;
-
     @FXML private Button renewloadSubmissionOp;
     @FXML private Button settings;
+
+    @FXML private AnchorPane rootPane;
+
+    private DatabaseHandler databaseHandler;
+
+    private boolean isReadyForSubmission = false;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
         databaseHandler = DatabaseHandler.getInstance();
-        bookinfo.setVisible(true);
-        memberinfo.setVisible(true);
+
+        if (bookinfo != null) bookinfo.setVisible(true);
+        if (memberinfo != null) memberinfo.setVisible(true);
     }
 
     /*
@@ -141,13 +147,11 @@ public class MainController implements Initializable {
 
             if (rs != null && rs.next()) {
 
-                String bName = rs.getString("title");
-                String bAuthor = rs.getString("author");
-                boolean bStatus = rs.getBoolean("isAvail");
+                bookname.setText(rs.getString("title"));
+                bookauthor.setText(rs.getString("author"));
 
-                bookname.setText(bName);
-                bookauthor.setText(bAuthor);
-                bookstatus.setText(bStatus ? "Available" : "Not Available");
+                boolean status = rs.getBoolean("isAvail");
+                bookstatus.setText(status ? "Available" : "Not Available");
 
             } else {
 
@@ -186,11 +190,8 @@ public class MainController implements Initializable {
 
             if (rs != null && rs.next()) {
 
-                String mName = rs.getString("name");
-                String mContact = rs.getString("mobile");
-
-                membername.setText(mName);
-                membercontact.setText(mContact);
+                membername.setText(rs.getString("name"));
+                membercontact.setText(rs.getString("mobile"));
 
             } else {
 
@@ -220,8 +221,6 @@ public class MainController implements Initializable {
         if (bookID.isEmpty() || memberID.isEmpty()) {
 
             Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Missing Information");
-            alert.setHeaderText(null);
             alert.setContentText("Please enter both Book ID and Member ID.");
             alert.showAndWait();
             return;
@@ -235,9 +234,7 @@ public class MainController implements Initializable {
             if (rs == null || !rs.next()) {
 
                 Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Book Not Found");
-                alert.setHeaderText(null);
-                alert.setContentText("The entered Book ID does not exist.");
+                alert.setContentText("Book ID does not exist.");
                 alert.showAndWait();
                 return;
             }
@@ -247,28 +244,24 @@ public class MainController implements Initializable {
             if (!available) {
 
                 Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setTitle("Book Not Available");
-                alert.setHeaderText(null);
-                alert.setContentText("This book has already been issued.");
+                alert.setContentText("Book already issued.");
                 alert.showAndWait();
                 return;
             }
 
-            String insertQuery =
+            String insert =
                     "INSERT INTO ISSUE(memberID, bookID) VALUES ('"
                     + memberID + "','" + bookID + "')";
 
-            String updateQuery =
+            String update =
                     "UPDATE BOOK SET isAvail=false WHERE LOWER(id)=LOWER('" + bookID + "')";
 
-            if (databaseHandler.execAction(insertQuery)
-                    && databaseHandler.execAction(updateQuery)) {
+            if (databaseHandler.execAction(insert)
+                    && databaseHandler.execAction(update)) {
 
                 bookstatus.setText("Not Available");
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Success");
-                alert.setHeaderText(null);
                 alert.setContentText("Book issued successfully.");
                 alert.showAndWait();
 
@@ -285,91 +278,88 @@ public class MainController implements Initializable {
 
     /*
     --------------------------------
-    Renew / Submission Tab
+    Renew / Submission Section
     --------------------------------
     */
 
-@FXML
-private void loadbookID2(ActionEvent event) {
+    @FXML
+    private void loadBookID2(ActionEvent event) {
 
-    ObservableList<String> issueData = FXCollections.observableArrayList();
+        ObservableList<String> issueData = FXCollections.observableArrayList();
+        isReadyForSubmission = false;
 
-    isReadyForSubmission = false;
+        String id = bookID2.getText().trim();
 
-    String id = bookID2.getText().trim();
+        if (id.isEmpty()) return;
 
-    if(id.isEmpty()){
-        return;
-    }
+        String query = "SELECT * FROM ISSUE WHERE LOWER(bookID)=LOWER('" + id + "')";
+        ResultSet rs = databaseHandler.execQuery(query);
 
-    String qu = "SELECT * FROM ISSUE WHERE LOWER(bookID)=LOWER('" + id + "')";
-    ResultSet rs = databaseHandler.execQuery(qu);
+        try {
 
-    try {
+            if (rs != null && rs.next()) {
 
-        if(rs != null && rs.next()) {
+                String mBookID = rs.getString("bookID");
+                String mMemberID = rs.getString("memberID");
+                Timestamp mIssueTime = rs.getTimestamp("issueTime");
+                int mRenewCount = rs.getInt("renew_count");
 
-            String mBookID = rs.getString("bookID");
-            String mMemberID = rs.getString("memberID");
-            Timestamp mIssueTime = rs.getTimestamp("issueTime");
-            int mRenewCount = rs.getInt("renew_count");
+                issueData.add("Issue Time : " + mIssueTime);
+                issueData.add("Renew Count : " + mRenewCount);
 
-            issueData.add("Issue Date and Time : " + mIssueTime.toString());
-            issueData.add("Renew Count : " + mRenewCount);
+                issueData.add("----------------------");
+                issueData.add("Book Information");
 
-            issueData.add("----------------------");
-            issueData.add("Book Information");
+                query = "SELECT * FROM BOOK WHERE LOWER(id)=LOWER('" + mBookID + "')";
+                ResultSet r1 = databaseHandler.execQuery(query);
 
-            qu = "SELECT * FROM BOOK WHERE LOWER(id)=LOWER('" + mBookID + "')";
-            ResultSet r1 = databaseHandler.execQuery(qu);
+                if (r1 != null && r1.next()) {
 
-            if(r1 != null && r1.next()) {
+                    issueData.add("Title : " + r1.getString("title"));
+                    issueData.add("Author : " + r1.getString("author"));
+                    issueData.add("Publisher : " + r1.getString("publisher"));
+                }
 
-                issueData.add("Title : " + r1.getString("title"));
-                issueData.add("ID : " + r1.getString("id"));
-                issueData.add("Author : " + r1.getString("author"));
-                issueData.add("Publisher : " + r1.getString("publisher"));
+                issueData.add("----------------------");
+                issueData.add("Member Information");
+
+                query = "SELECT * FROM MEMBER WHERE LOWER(id)=LOWER('" + mMemberID + "')";
+                r1 = databaseHandler.execQuery(query);
+
+                if (r1 != null && r1.next()) {
+
+                    issueData.add("Name : " + r1.getString("name"));
+                    issueData.add("Mobile : " + r1.getString("mobile"));
+                    issueData.add("Email : " + r1.getString("email"));
+                }
+
+                isReadyForSubmission = true;
+
+            } else {
+
+                issueData.add("No issue record found for this book.");
             }
 
-            issueData.add("----------------------");
-            issueData.add("Member Information");
+        } catch (SQLException ex) {
 
-            qu = "SELECT * FROM MEMBER WHERE LOWER(id)=LOWER('" + mMemberID + "')";
-            r1 = databaseHandler.execQuery(qu);
-
-            if(r1 != null && r1.next()) {
-
-                issueData.add("Name : " + r1.getString("name"));
-                issueData.add("Mobile : " + r1.getString("mobile"));
-                issueData.add("Email : " + r1.getString("email"));
-            }
-
-            isReadyForSubmission = true;
-
-        } else {
-
-            issueData.add("No issue record found for this book.");
+            Logger.getLogger(MainController.class.getName())
+                    .log(Level.SEVERE, null, ex);
         }
 
-    } catch (SQLException ex) {
-
-        Logger.getLogger(MainController.class.getName())
-                .log(Level.SEVERE, null, ex);
+        issuedatalist.getItems().setAll(issueData);
     }
-
-    issuedatalist.getItems().setAll(issueData);
-}
 
     /*
     --------------------------------
-    Submission Operation
+    Submit Book
     --------------------------------
     */
 
     @FXML
     private void loadSubmissionOp(ActionEvent event) {
 
-        if(!isReadyForSubmission){
+        if (!isReadyForSubmission) {
+
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Please select a book to submit");
             alert.showAndWait();
@@ -378,22 +368,24 @@ private void loadbookID2(ActionEvent event) {
 
         String id = bookID2.getText();
 
-        String ac1 = "DELETE FROM ISSUE WHERE BOOKID = '" + id + "'";
-        String ac2 = "UPDATE BOOK SET ISAVAIL = TRUE WHERE ID = '" + id + "'";
+        String delete = "DELETE FROM ISSUE WHERE BOOKID = '" + id + "'";
+        String update = "UPDATE BOOK SET ISAVAIL = TRUE WHERE ID = '" + id + "'";
 
-        if (databaseHandler.execAction(ac1) && databaseHandler.execAction(ac2)) {
+        if (databaseHandler.execAction(delete) && databaseHandler.execAction(update)) {
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Book Has Been Submitted");
+            alert.setContentText("Book submitted successfully");
             alert.showAndWait();
 
             issuedatalist.getItems().clear();
+            bookID2.clear();
+            isReadyForSubmission = false;
         }
     }
 
     /*
     --------------------------------
-    Renew Operation
+    Renew Book
     --------------------------------
     */
 
@@ -410,17 +402,69 @@ private void loadbookID2(ActionEvent event) {
 
         String id = bookID2.getText();
 
-        String ac = "UPDATE ISSUE SET issueTime = CURRENT_TIMESTAMP, "
-                + "renew_count = renew_count + 1 "
-                + "WHERE BOOKID = '" + id + "'";
+        String query =
+                "UPDATE ISSUE SET issueTime = CURRENT_TIMESTAMP, renew_count = renew_count + 1 WHERE BOOKID = '" + id + "'";
 
-        if (databaseHandler.execAction(ac)) {
+        if (databaseHandler.execAction(query)) {
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Book Has Been Renewed");
+            alert.setContentText("Book renewed successfully");
             alert.showAndWait();
 
-            loadbookID2(null);
+            loadBookID2(null);
         }
+    }
+
+    /*
+    --------------------------------
+    Settings
+    --------------------------------
+    */
+
+    @FXML
+    private void loadSettings(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/Settings.fxml", "Settings");
+    }
+
+    /*
+    --------------------------------
+    Menu Actions
+    --------------------------------
+    */
+
+    @FXML
+    private void handleMenuClose(ActionEvent event) {
+        ((Stage) rootPane.getScene().getWindow()).close();
+    }
+
+    @FXML
+    private void handleMenuAddBook(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/AddBook.fxml", "Add New Book");
+    }
+
+    @FXML
+    private void handleMenuAddMember(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/AddMember.fxml", "Add New Member");
+    }
+
+    @FXML
+    private void handleMenuViewBook(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/Booklist.fxml", "Book List");
+    }
+
+    @FXML
+    private void handleMenuViewMember(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/ListMember.fxml", "Member List");
+    }
+
+    @FXML
+    private void handleMenuFullScreean(ActionEvent event) {
+    Stage stage = (Stage) rootPane.getScene().getWindow();
+    stage.setFullScreen(!stage.isFullScreen());        
+    }
+
+    @FXML
+    private void handleMenuViewBorrowedBooks(ActionEvent event) {
+        loadWindow("/com/mycompany/librarymis/BorrowedBooks.fxml", "Borrowed Books");
     }
 }

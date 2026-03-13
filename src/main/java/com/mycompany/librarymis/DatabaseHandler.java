@@ -6,6 +6,9 @@ import java.sql.Statement;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.PreparedStatement;
+
+import javafx.scene.control.Alert;
 
 public class DatabaseHandler {
 
@@ -30,20 +33,22 @@ public class DatabaseHandler {
         return handler;
     }
 
-    private void createConnection() {
+    void createConnection() {
 
         try {
 
+            Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection(DB_URL);
 
-            if (conn != null) {
-                System.out.println("SQLite database connected.");
-            }
+        } catch (Exception e) {
 
-        } catch (SQLException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Database Error");
+            alert.setHeaderText(null);
+            alert.setContentText("Can't load database");
+            alert.showAndWait();
 
-            System.err.println("Database connection failed.");
-            e.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -184,4 +189,103 @@ public class DatabaseHandler {
         return conn;
     }
 
+    // DELETE BOOK
+    public boolean deleteBook(BooklistController.Book book) {
+
+        String deleteStatement = "DELETE FROM BOOK WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(deleteStatement)) {
+
+            stmt.setString(1, book.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            System.out.println("Rows deleted: " + rowsAffected);
+
+            return rowsAffected > 0;
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    // DELETE MEMBER
+    public boolean deleteMember(ListMemberController.Member member) {
+
+        String deleteStatement = "DELETE FROM MEMBER WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(deleteStatement)) {
+
+            stmt.setString(1, member.getId());
+
+            int rowsAffected = stmt.executeUpdate();
+
+            System.out.println("Rows deleted: " + rowsAffected);
+
+            return rowsAffected > 0;
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    // CHECK IF BOOK IS ISSUED
+    public boolean isBookAlreadyIssued(BooklistController.Book book) {
+
+        String checkStmt = "SELECT COUNT(*) FROM ISSUE WHERE bookID = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(checkStmt)) {
+
+            stmt.setString(1, book.getId());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+
+                int count = rs.getInt(1);
+
+                System.out.println("Issued count: " + count);
+
+                return count > 0;
+            }
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return false;
+    }
+
+    // CHECK IF MEMBER HAS BORROWED BOOKS
+    public boolean isMemberHasBooks(ListMemberController.Member member) {
+
+        String checkStmt = "SELECT COUNT(*) FROM ISSUE WHERE memberID = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(checkStmt)) {
+
+            stmt.setString(1, member.getId());
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+
+                int count = rs.getInt(1);
+
+                System.out.println("Borrowed books: " + count);
+
+                return count > 0;
+            }
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+        }
+
+        return false;
+    }
 }

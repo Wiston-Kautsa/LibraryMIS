@@ -3,6 +3,7 @@ package com.mycompany.librarymis;
 import java.net.URL;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -18,6 +19,10 @@ import javafx.scene.layout.AnchorPane;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.ActionEvent;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 
 public class BooklistController implements Initializable {
 
@@ -43,6 +48,9 @@ public class BooklistController implements Initializable {
     private TableColumn<Book, Boolean> availabilityCol;
 
     private ObservableList<Book> list = FXCollections.observableArrayList();
+
+    @FXML
+    private MenuItem deleteBook;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -94,6 +102,55 @@ public class BooklistController implements Initializable {
         }
 
         tableView.setItems(list);
+    }
+
+    @FXML
+    private void loadDeleteBook(ActionEvent event) {
+
+        Book selectedBook = tableView.getSelectionModel().getSelectedItem();
+
+        if (selectedBook == null) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Book Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a book to delete.");
+            alert.showAndWait();
+
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Book");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Are you sure you want to delete the book:\n" + selectedBook.getTitle());
+
+        Optional<ButtonType> result = confirm.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+
+            boolean deleted = DatabaseHandler.getInstance().deleteBook(selectedBook);
+
+            if (deleted) {
+
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText(null);
+                alert.setContentText("Book deleted successfully.");
+                alert.showAndWait();
+
+                // remove from table without reloading database
+                list.remove(selectedBook);
+
+            } else {
+
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Failed to delete the book.");
+                alert.showAndWait();
+            }
+        }
     }
 
     public static class Book {

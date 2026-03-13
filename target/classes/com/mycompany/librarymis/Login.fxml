@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="157.0" prefWidth="308.0" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.librarymis.LoginController">
+
+    <stylesheets>
+        <URL value="@login.css" />
+    </stylesheets>
+
+    <children>
+
+        <VBox layoutX="14.0" layoutY="6.0" prefHeight="212.0" prefWidth="308.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+            <children>
+
+                <Label fx:id="titleLabel" alignment="CENTER" prefHeight="26.0" prefWidth="1000.0" style="-fx-background-color:black; -fx-text-fill:white;" text="LOGIN">
+
+                    <VBox.margin>
+                        <Insets left="20.0" right="20.0" />
+                    </VBox.margin>
+
+                </Label>
+
+                <TextField fx:id="username" promptText="Username">
+
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="20.0" top="10.0" />
+                    </VBox.margin>
+
+                </TextField>
+
+                <!-- FIXED HERE -->
+                <PasswordField fx:id="password" onAction="#handleLoginButtonAction" promptText="Password">
+
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="20.0" top="10.0" />
+                    </VBox.margin>
+
+                </PasswordField>
+
+                <HBox alignment="CENTER" prefHeight="38.0" prefWidth="308.0">
+
+                    <children>
+
+                        <Button onAction="#handleLoginButtonAction" prefWidth="120" text="Login">
+
+                            <HBox.margin>
+                                <Insets bottom="5" left="10" right="10" top="10" />
+                            </HBox.margin>
+
+                        </Button>
+
+                        <Button onAction="#handleCancelButtonAction" prefWidth="120" text="Cancel">
+
+                            <HBox.margin>
+                                <Insets bottom="5" left="10" right="10" top="10" />
+                            </HBox.margin>
+
+                        </Button>
+
+                    </children>
+
+                </HBox>
+
+            </children>
+
+        </VBox>
+
+    </children>
+
+</AnchorPane>

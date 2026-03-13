@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="400" prefWidth="600" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.librarymis.BorrowedBooksController">
+
+    <children>
+
+        <TableView fx:id="tableView" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+            <columns>
+
+                <TableColumn fx:id="bookIDCol" minWidth="100.0" text="Book ID" />
+                <TableColumn fx:id="titleCol" minWidth="100.0" text="Book Title" />
+                <TableColumn fx:id="memberIDCol" minWidth="100.0" text="Member ID" />
+                <TableColumn fx:id="memberNameCol" minWidth="100.0" text="Member Name" />
+                <TableColumn fx:id="issueTimeCol" minWidth="100.0" text="Issue Time" />
+
+            </columns>
+         <columnResizePolicy>
+            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+         </columnResizePolicy>
+
+        </TableView>
+
+    </children>
+
+</AnchorPane>

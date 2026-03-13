@@ -9,21 +9,16 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane id="AnchorPane" prefHeight="221.0" prefWidth="254.0" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="com.mycompany.librarymis.SettingsController">
+<AnchorPane id="AnchorPane" prefHeight="220.0" prefWidth="260.0" styleClass="mainFxmlClass" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/25" fx:controller="com.mycompany.librarymis.SettingsController">
     <stylesheets>
         <URL value="@settings.css" />
     </stylesheets>
    <children>
-      <VBox prefHeight="241.0" prefWidth="254.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox prefHeight="177.0" prefWidth="260.0" AnchorPane.bottomAnchor="44.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
-            <Button mnemonicParsing="false" prefHeight="25.0" prefWidth="258.0" text="SETTINGS">
-               <VBox.margin>
-                  <Insets bottom="5.0" left="20.0" right="20.0" />
-               </VBox.margin>
-            </Button>
             <TextField fx:id="nDaysWithoutFine" promptText="Number of days member can keep book without fine">
                <VBox.margin>
-                  <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+                  <Insets bottom="5.0" left="10.0" right="10.0" top="30.0" />
                </VBox.margin>
             </TextField>
             <TextField fx:id="finePerDay" layoutX="10.0" layoutY="40.0" promptText="Fine per day">
@@ -43,14 +38,14 @@
             </PasswordField>
          </children>
       </VBox>
-      <HBox alignment="CENTER" layoutX="9.0" layoutY="177.0" prefHeight="50.0" prefWidth="255.0">
+      <HBox alignment="CENTER" layoutX="20.0" layoutY="185.0" prefHeight="43.0" prefWidth="255.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="180.0">
          <children>
-            <Button fx:id="save" mnemonicParsing="false" onAction="#saveButtonAction" prefHeight="25.0" prefWidth="99.0" text="Save">
+            <Button fx:id="save" contentDisplay="CENTER" mnemonicParsing="false" onAction="#saveButtonAction" prefHeight="100.0" prefWidth="200.0" text="Save">
                <HBox.margin>
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                </HBox.margin>
             </Button>
-            <Button fx:id="cancel" layoutX="84.0" layoutY="10.0" mnemonicParsing="false" onAction="#cancelButtonAction" prefHeight="25.0" prefWidth="99.0" text="Cancel">
+            <Button fx:id="cancel" contentDisplay="CENTER" layoutX="84.0" layoutY="10.0" mnemonicParsing="false" onAction="#cancelButtonAction" prefHeight="100.0" prefWidth="200.0" text="Cancel">
                <HBox.margin>
                   <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
                </HBox.margin>

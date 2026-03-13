@@ -1,10 +1,15 @@
-com\mycompany\librarymis\BooklistController$Book.class
 com\mycompany\librarymis\AddBookController.class
 com\mycompany\librarymis\ListMemberController.class
 com\mycompany\librarymis\AddMemberController.class
-com\mycompany\librarymis\ListMemberController$Member.class
 module-info.class
 com\mycompany\librarymis\App.class
+com\mycompany\librarymis\LoginController.class
+com\mycompany\librarymis\BooklistController$Book.class
+com\mycompany\librarymis\BorrowedBooksController$BorrowedBook.class
+com\mycompany\librarymis\SettingsController.class
+com\mycompany\librarymis\ListMemberController$Member.class
+com\mycompany\librarymis\BorrowedBooksController.class
 com\mycompany\librarymis\BooklistController.class
+com\mycompany\librarymis\Preferences.class
 com\mycompany\librarymis\MainController.class
 com\mycompany\librarymis\DatabaseHandler.class
