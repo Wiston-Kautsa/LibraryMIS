@@ -11,15 +11,23 @@ import java.util.logging.Logger;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+
+import javafx.scene.layout.GridPane;
 
 public class ListMemberController implements Initializable {
 
@@ -46,11 +54,19 @@ public class ListMemberController implements Initializable {
     @FXML
     private MenuItem deleteMember;
 
+    @FXML
+    private MenuItem editMember1;
+
+    @FXML
+    private MenuItem refreshMember;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         initCol();
         loadData();
     }
+
+    // ---------------- INITIALIZE TABLE COLUMNS ----------------
 
     private void initCol() {
 
@@ -60,6 +76,8 @@ public class ListMemberController implements Initializable {
         emailCol.setCellValueFactory(new PropertyValueFactory<>("email"));
         borrowedCol.setCellValueFactory(new PropertyValueFactory<>("borrowed"));
     }
+
+    // ---------------- LOAD DATA FROM DATABASE ----------------
 
     private void loadData() {
 
@@ -103,6 +121,8 @@ public class ListMemberController implements Initializable {
         tableView.setItems(list);
     }
 
+    // ---------------- DELETE MEMBER ----------------
+
     @FXML
     private void loadDeleteMember(ActionEvent event) {
 
@@ -110,23 +130,19 @@ public class ListMemberController implements Initializable {
 
         if (selectedMember == null) {
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Member Selected");
-            alert.setContentText("Please select a member to delete.");
-            alert.showAndWait();
+            showAlert("No Member Selected", "Please select a member to delete.");
             return;
         }
 
         if (DatabaseHandler.getInstance().isMemberHasBooks(selectedMember)) {
 
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Member Has Borrowed Books");
-            alert.setContentText("This member still has borrowed books and cannot be deleted.");
-            alert.showAndWait();
+            showAlert("Member Has Borrowed Books",
+                    "This member still has borrowed books and cannot be deleted.");
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+
         confirm.setTitle("Delete Member");
         confirm.setContentText("Delete member: " + selectedMember.getName());
 
@@ -137,10 +153,102 @@ public class ListMemberController implements Initializable {
             boolean deleted = DatabaseHandler.getInstance().deleteMember(selectedMember);
 
             if (deleted) {
-                list.remove(selectedMember);
+
+                showAlert("Success", "Member deleted successfully.");
+
+                loadData();
             }
         }
     }
+
+    // ---------------- EDIT MEMBER (MULTI FIELD WINDOW) ----------------
+
+    @FXML
+    private void loadEditMember(ActionEvent event) {
+
+        Member selectedMember = tableView.getSelectionModel().getSelectedItem();
+
+        if (selectedMember == null) {
+
+            showAlert("No Member Selected", "Please select a member to edit.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Member");
+
+        ButtonType saveButton = new ButtonType("Save", ButtonType.OK.getButtonData());
+        dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField nameField = new TextField(selectedMember.getName());
+        TextField mobileField = new TextField(selectedMember.getMobile());
+        TextField emailField = new TextField(selectedMember.getEmail());
+
+        grid.add(new Label("Name:"), 0, 0);
+        grid.add(nameField, 1, 0);
+
+        grid.add(new Label("Mobile:"), 0, 1);
+        grid.add(mobileField, 1, 1);
+
+        grid.add(new Label("Email:"), 0, 2);
+        grid.add(emailField, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == saveButton) {
+
+            Member updatedMember = new Member(
+                    nameField.getText(),
+                    selectedMember.getId(),
+                    mobileField.getText(),
+                    emailField.getText(),
+                    selectedMember.getBorrowed()
+            );
+
+            boolean success = DatabaseHandler.getInstance().updateMember(updatedMember);
+
+            if (success) {
+
+                showAlert("Success", "Member updated successfully.");
+
+                loadData();
+            } else {
+
+                showAlert("Error", "Failed to update member.");
+            }
+        }
+    }
+
+    // ---------------- REFRESH MEMBER TABLE ----------------
+
+    @FXML
+    private void loadRefreshMember(ActionEvent event) {
+
+        loadData();
+
+        showAlert("Refreshed", "Member list refreshed.");
+    }
+
+    // ---------------- ALERT HELPER ----------------
+
+    private void showAlert(String title, String message) {
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
+    }
+
+    // ---------------- MEMBER MODEL ----------------
 
     public static class Member {
 

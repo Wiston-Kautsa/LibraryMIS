@@ -7,37 +7,28 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane fx:id="rootPane"
-            prefHeight="392.0"
-            prefWidth="522.0"
-            xmlns="http://javafx.com/javafx/17"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.mycompany.librarymis.BooklistController">
+<AnchorPane fx:id="rootPane" prefHeight="392.0" prefWidth="522.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.librarymis.BooklistController">
 
     <stylesheets>
-        <URL value="@booklist.css"/>
+        <URL value="@booklist.css" />
     </stylesheets>
 
     <children>
 
-        <TableView fx:id="tableView"
-                   AnchorPane.topAnchor="0.0"
-                   AnchorPane.bottomAnchor="0.0"
-                   AnchorPane.leftAnchor="0.0"
-                   AnchorPane.rightAnchor="0.0">
+        <TableView fx:id="tableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 
             <columns>
 
-                <TableColumn fx:id="titleCol" text="Book Title"/>
-                <TableColumn fx:id="idCol" text="Book ID"/>
-                <TableColumn fx:id="authorCol" text="Book Author"/>
-                <TableColumn fx:id="publisherCol" text="Publisher"/>
-                <TableColumn fx:id="availabilityCol" text="Availability"/>
+                <TableColumn fx:id="titleCol" text="Book Title" />
+                <TableColumn fx:id="idCol" text="Book ID" />
+                <TableColumn fx:id="authorCol" text="Book Author" />
+                <TableColumn fx:id="publisherCol" text="Publisher" />
+                <TableColumn fx:id="availabilityCol" text="Availability" />
 
             </columns>
 
             <columnResizePolicy>
-                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+                <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
 
             <contextMenu>
@@ -46,10 +37,9 @@
 
                     <items>
 
-                        <MenuItem fx:id="deleteBook"
-                                  mnemonicParsing="false"
-                                  text="Delete"
-                                  onAction="#loadDeleteBook"/>
+                        <MenuItem fx:id="deleteBook" mnemonicParsing="false" onAction="#loadDeleteBook" text="Delete" />
+                  <MenuItem fx:id="editBook" mnemonicParsing="false" onAction="#loadEditBook" text="Edit" />
+                  <MenuItem fx:id="refreshBook" mnemonicParsing="false" onAction="#loadRefreshBook" text="Refresh" />
 
                     </items>
 

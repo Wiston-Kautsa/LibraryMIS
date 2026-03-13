@@ -52,6 +52,8 @@ public class DatabaseHandler {
         }
     }
 
+    // ---------------- BOOK TABLE ----------------
+
     private void setupBookTable() {
 
         String TABLE_NAME = "BOOK";
@@ -86,6 +88,8 @@ public class DatabaseHandler {
         }
     }
 
+    // ---------------- MEMBER TABLE ----------------
+
     private void setupMemberTable() {
 
         String TABLE_NAME = "MEMBER";
@@ -118,6 +122,8 @@ public class DatabaseHandler {
             e.printStackTrace();
         }
     }
+
+    // ---------------- ISSUE TABLE ----------------
 
     private void setupIssueTable() {
 
@@ -155,6 +161,8 @@ public class DatabaseHandler {
         }
     }
 
+    // ---------------- EXECUTE QUERY ----------------
+
     public ResultSet execQuery(String query) {
 
         try {
@@ -169,6 +177,8 @@ public class DatabaseHandler {
             return null;
         }
     }
+
+    // ---------------- EXECUTE ACTION ----------------
 
     public boolean execAction(String query) {
 
@@ -189,7 +199,8 @@ public class DatabaseHandler {
         return conn;
     }
 
-    // DELETE BOOK
+    // ---------------- DELETE BOOK ----------------
+
     public boolean deleteBook(BooklistController.Book book) {
 
         String deleteStatement = "DELETE FROM BOOK WHERE id = ?";
@@ -211,7 +222,35 @@ public class DatabaseHandler {
         }
     }
 
-    // DELETE MEMBER
+    // ---------------- UPDATE BOOK (EDIT BOOK) ----------------
+
+    public boolean updateBook(BooklistController.Book book) {
+
+        String updateStatement =
+                "UPDATE BOOK SET title = ?, author = ?, publisher = ? WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(updateStatement)) {
+
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getAuthor());
+            stmt.setString(3, book.getPublisher());
+            stmt.setString(4, book.getId());
+
+            int res = stmt.executeUpdate();
+
+            System.out.println("Rows updated: " + res);
+
+            return res > 0;
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    // ---------------- DELETE MEMBER ----------------
+
     public boolean deleteMember(ListMemberController.Member member) {
 
         String deleteStatement = "DELETE FROM MEMBER WHERE id = ?";
@@ -233,7 +272,35 @@ public class DatabaseHandler {
         }
     }
 
-    // CHECK IF BOOK IS ISSUED
+    // ---------------- UPDATE MEMBER (EDIT MEMBER) ----------------
+
+    public boolean updateMember(ListMemberController.Member member) {
+
+        String updateStatement =
+                "UPDATE MEMBER SET name = ?, mobile = ?, email = ? WHERE id = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(updateStatement)) {
+
+            stmt.setString(1, member.getName());
+            stmt.setString(2, member.getMobile());
+            stmt.setString(3, member.getEmail());
+            stmt.setString(4, member.getId());
+
+            int res = stmt.executeUpdate();
+
+            System.out.println("Rows updated: " + res);
+
+            return res > 0;
+
+        } catch (SQLException ex) {
+
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    // ---------------- CHECK IF BOOK IS ISSUED ----------------
+
     public boolean isBookAlreadyIssued(BooklistController.Book book) {
 
         String checkStmt = "SELECT COUNT(*) FROM ISSUE WHERE bookID = ?";
@@ -261,7 +328,8 @@ public class DatabaseHandler {
         return false;
     }
 
-    // CHECK IF MEMBER HAS BORROWED BOOKS
+    // ---------------- CHECK IF MEMBER HAS BOOKS ----------------
+
     public boolean isMemberHasBooks(ListMemberController.Member member) {
 
         String checkStmt = "SELECT COUNT(*) FROM ISSUE WHERE memberID = ?";
@@ -288,4 +356,5 @@ public class DatabaseHandler {
 
         return false;
     }
+
 }

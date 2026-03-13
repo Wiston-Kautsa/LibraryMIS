@@ -12,17 +12,26 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+
 import javafx.scene.layout.AnchorPane;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+
 import javafx.event.ActionEvent;
+
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
+
+import javafx.scene.layout.GridPane;
 
 public class BooklistController implements Initializable {
 
@@ -52,12 +61,20 @@ public class BooklistController implements Initializable {
     @FXML
     private MenuItem deleteBook;
 
+    @FXML
+    private MenuItem editBook;
+
+    @FXML
+    private MenuItem refreshBook;
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
 
         initCol();
         loadData();
     }
+
+    // ---------------- INITIALIZE TABLE COLUMNS ----------------
 
     private void initCol() {
 
@@ -67,6 +84,8 @@ public class BooklistController implements Initializable {
         publisherCol.setCellValueFactory(new PropertyValueFactory<>("publisher"));
         availabilityCol.setCellValueFactory(new PropertyValueFactory<>("availability"));
     }
+
+    // ---------------- LOAD DATA ----------------
 
     private void loadData() {
 
@@ -104,6 +123,8 @@ public class BooklistController implements Initializable {
         tableView.setItems(list);
     }
 
+    // ---------------- DELETE BOOK ----------------
+
     @FXML
     private void loadDeleteBook(ActionEvent event) {
 
@@ -111,19 +132,22 @@ public class BooklistController implements Initializable {
 
         if (selectedBook == null) {
 
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("No Book Selected");
-            alert.setHeaderText(null);
-            alert.setContentText("Please select a book to delete.");
-            alert.showAndWait();
+            showAlert(Alert.AlertType.WARNING, "No Book Selected", "Please select a book to delete.");
+            return;
+        }
+
+        if (DatabaseHandler.getInstance().isBookAlreadyIssued(selectedBook)) {
+
+            showAlert(Alert.AlertType.ERROR, "Book Issued",
+                    "This book is currently issued and cannot be deleted.");
 
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+
         confirm.setTitle("Delete Book");
-        confirm.setHeaderText(null);
-        confirm.setContentText("Are you sure you want to delete the book:\n" + selectedBook.getTitle());
+        confirm.setContentText("Delete book: " + selectedBook.getTitle());
 
         Optional<ButtonType> result = confirm.showAndWait();
 
@@ -133,25 +157,106 @@ public class BooklistController implements Initializable {
 
             if (deleted) {
 
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.setTitle("Success");
-                alert.setHeaderText(null);
-                alert.setContentText("Book deleted successfully.");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Book deleted successfully.");
 
-                // remove from table without reloading database
-                list.remove(selectedBook);
+                loadData();
 
             } else {
 
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Error");
-                alert.setHeaderText(null);
-                alert.setContentText("Failed to delete the book.");
-                alert.showAndWait();
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to delete the book.");
             }
         }
     }
+
+    // ---------------- EDIT BOOK (MULTI FIELD WINDOW) ----------------
+
+    @FXML
+    private void loadEditBook(ActionEvent event) {
+
+        Book selectedBook = tableView.getSelectionModel().getSelectedItem();
+
+        if (selectedBook == null) {
+
+            showAlert(Alert.AlertType.WARNING, "No Book Selected", "Please select a book to edit.");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Edit Book");
+
+        ButtonType saveButton = new ButtonType("Save", ButtonType.OK.getButtonData());
+        dialog.getDialogPane().getButtonTypes().addAll(saveButton, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField titleField = new TextField(selectedBook.getTitle());
+        TextField authorField = new TextField(selectedBook.getAuthor());
+        TextField publisherField = new TextField(selectedBook.getPublisher());
+
+        grid.add(new Label("Book Title:"), 0, 0);
+        grid.add(titleField, 1, 0);
+
+        grid.add(new Label("Book Author:"), 0, 1);
+        grid.add(authorField, 1, 1);
+
+        grid.add(new Label("Publisher:"), 0, 2);
+        grid.add(publisherField, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == saveButton) {
+
+            Book updatedBook = new Book(
+                    titleField.getText(),
+                    selectedBook.getId(),
+                    authorField.getText(),
+                    publisherField.getText(),
+                    selectedBook.getAvailability()
+            );
+
+            boolean success = DatabaseHandler.getInstance().updateBook(updatedBook);
+
+            if (success) {
+
+                showAlert(Alert.AlertType.INFORMATION, "Success", "Book updated successfully.");
+
+                loadData();
+
+            } else {
+
+                showAlert(Alert.AlertType.ERROR, "Error", "Failed to update book.");
+            }
+        }
+    }
+
+    // ---------------- REFRESH TABLE ----------------
+
+    @FXML
+    private void loadRefreshBook(ActionEvent event) {
+
+        loadData();
+
+        showAlert(Alert.AlertType.INFORMATION, "Refreshed", "Book list refreshed.");
+    }
+
+    // ---------------- ALERT HELPER ----------------
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+
+        Alert alert = new Alert(type);
+
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        alert.showAndWait();
+    }
+
+    // ---------------- BOOK MODEL ----------------
 
     public static class Book {
 
@@ -170,24 +275,10 @@ public class BooklistController implements Initializable {
             this.availability = new SimpleBooleanProperty(availability);
         }
 
-        public String getTitle() {
-            return title.get();
-        }
-
-        public String getId() {
-            return id.get();
-        }
-
-        public String getAuthor() {
-            return author.get();
-        }
-
-        public String getPublisher() {
-            return publisher.get();
-        }
-
-        public Boolean getAvailability() {
-            return availability.get();
-        }
+        public String getTitle() { return title.get(); }
+        public String getId() { return id.get(); }
+        public String getAuthor() { return author.get(); }
+        public String getPublisher() { return publisher.get(); }
+        public Boolean getAvailability() { return availability.get(); }
     }
 }
